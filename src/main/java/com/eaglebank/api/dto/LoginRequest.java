@@ -5,8 +5,9 @@ import lombok.Data;
 
 @Data
 public class LoginRequest {
-    @NotBlank
+    @NotBlank(message = "Username cannot be blank") // This maps to User's 'email' now
     private String username;
-    @NotBlank
+
+    @NotBlank(message = "Password cannot be blank")
     private String password;
 }

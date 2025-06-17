@@ -1,6 +1,7 @@
 package com.eaglebank.api.service;
 
-import com.eaglebank.api.dto.UserDto;
+import com.eaglebank.api.dto.CreateUserRequest;
+import com.eaglebank.api.dto.UpdateUserRequest;
 import com.eaglebank.api.exceptiom.BadRequestException;
 import com.eaglebank.api.exceptiom.ConflictException;
 import com.eaglebank.api.exceptiom.ForbiddenException;
@@ -12,97 +13,87 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 @Service
-@RequiredArgsConstructor // Lombok for constructor injection
+@RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder; // Inject BCryptPasswordEncoder
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public User createUser(UserDto userDto) {
-        if (userRepository.existsByUsername(userDto.getUsername())) {
-            throw new BadRequestException("User with this username already exists.");
+    public User createUser(CreateUserRequest request) {
+        String internalUsername = request.getEmail();
+
+        if (userRepository.existsByUsername(internalUsername)) {
+            throw new BadRequestException("User with this email already exists.");
         }
+
         User user = new User();
-        user.setUsername(userDto.getUsername());
-        user.setPassword(passwordEncoder.encode(userDto.getPassword()));
-        user.setEmail(userDto.getEmail());
+        user.setId("usr-" + UUID.randomUUID().toString().substring(0, 8));
+        user.setUsername(internalUsername);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setName(request.getName());
+        user.setAddress(request.getAddress());
+        user.setPhoneNumber(request.getPhoneNumber());
+        user.setEmail(request.getEmail());
+
         return userRepository.save(user);
     }
 
-    public User getUserById(Long userId, String authenticatedUsername) {
+    public User getUserById(String userId, String authenticatedUserId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
 
-        if (!user.getUsername().equals(authenticatedUsername)) {
-            throw new ForbiddenException("You are not authorized to view this user's details.");
+        if (!userId.equals(authenticatedUserId)) {
+            throw new ForbiddenException("The user is not allowed to access the user details.");
         }
         return user;
     }
 
-    /**
-     * Updates user details by ID, ensuring the requesting user is authorized to update them.
-     * Only provided fields in the DTO will be updated.
-     *
-     * @param userId The ID of the user to update.
-     * @param authenticatedUserId The ID of the currently authenticated user.
-     * @param userDto Data Transfer Object containing updated user details.
-     * @return The updated User entity.
-     * @throws ResourceNotFoundException if the user does not exist.
-     * @throws ConflictException if the authenticated user is not authorized to update the user's details.
-     */
     @Transactional
-    public User updateUser(Long userId, Long authenticatedUserId, UserDto userDto) {
+    public User updateUser(String userId, String authenticatedUserId, UpdateUserRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
 
-        // Authorization check: A user can only update their own details
         if (!userId.equals(authenticatedUserId)) {
-            throw new ConflictException("You are not authorized to update this user's details.");
+            throw new ForbiddenException("The user is not allowed to update the user details.");
         }
 
-        // Apply updates if fields are provided in the DTO
-        if (userDto.getEmail() != null && !userDto.getEmail().isBlank()) {
-            user.setEmail(userDto.getEmail());
+        if (request.getName() != null && !request.getName().isBlank()) {
+            user.setName(request.getName());
         }
-        if (userDto.getPassword() != null && !userDto.getPassword().isBlank()) {
-            // Encode the new password before updating
-            user.setPassword(passwordEncoder.encode(userDto.getPassword()));
+        if (request.getAddress() != null) {
+            user.setAddress(request.getAddress());
         }
-        // Add more fields here if they are updatable (e.g., name, address)
+        if (request.getPhoneNumber() != null && !request.getPhoneNumber().isBlank()) {
+            user.setPhoneNumber(request.getPhoneNumber());
+        }
+        if (request.getEmail() != null && !request.getEmail().isBlank()) {
+            user.setEmail(request.getEmail());
+            user.setUsername(request.getEmail());
+        }
+        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
 
         return userRepository.save(user);
     }
 
-    /**
-     * Deletes a user by ID, ensuring the requesting user is authorized and has no associated bank accounts.
-     *
-     * @param userId The ID of the user to delete.
-     * @param authenticatedUserId The ID of the currently authenticated user.
-     * @throws ResourceNotFoundException if the user does not exist.
-     * @throws ConflictException if the authenticated user is not authorized to delete the user.
-     * @throws ConflictException if the user has associated bank accounts.
-     */
     @Transactional
-    public void deleteUser(Long userId, Long authenticatedUserId) {
+    public void deleteUser(String userId, String authenticatedUserId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
 
-        // Authorization check: A user can only delete their own details
         if (!userId.equals(authenticatedUserId)) {
-            throw new ConflictException("You are not authorized to delete this user.");
+            throw new ForbiddenException("The user is not allowed to delete the user details.");
         }
 
-        // Scenario: User wants to delete their user details and they have a bank account
-        // If the user has any accounts, prevent deletion
         if (user.getAccounts() != null && !user.getAccounts().isEmpty()) {
-            throw new ConflictException("User cannot be deleted as they have associated bank accounts.");
+            throw new ConflictException("A user cannot be deleted when they are associated with a bank account.");
         }
 
         userRepository.delete(user);
     }
-
-    // Implement update and delete methods following the scenarios.
-    // For delete, check if the user has bank accounts (Conflict scenario).
 }

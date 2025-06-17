@@ -1,6 +1,6 @@
 package com.eaglebank.api.service;
 
-import com.eaglebank.api.dto.TransactionRequest;
+import com.eaglebank.api.dto.CreateTransactionRequest;
 import com.eaglebank.api.exceptiom.BadRequestException;
 import com.eaglebank.api.exceptiom.InsufficientFundsException;
 import com.eaglebank.api.exceptiom.ResourceNotFoundException;
@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -24,45 +25,51 @@ public class TransactionService {
     private final AccountRepository accountRepository;
 
     @Transactional
-    public Transaction performTransaction(Long accountId, Long userId, TransactionRequest transactionRequest) {
-        Account account = accountRepository.findByIdAndUserId(accountId, userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Account not found or not associated with your user."));
+    public Transaction performTransaction(String accountNumber, String authenticatedUserId, CreateTransactionRequest request) {
+        Account account = accountRepository.findByAccountNumberAndUserId(accountNumber, authenticatedUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("Bank account was not found or not associated with your user."));
 
-        BigDecimal amount = transactionRequest.getAmount();
-        String type = transactionRequest.getType();
+        BigDecimal amount = request.getAmount();
+        String type = request.getType();
 
-        if (type.equalsIgnoreCase("DEPOSIT")) {
+        if (type.equalsIgnoreCase("deposit")) {
             account.setBalance(account.getBalance().add(amount));
-        } else if (type.equalsIgnoreCase("WITHDRAWAL")) {
+        } else if (type.equalsIgnoreCase("withdrawal")) {
             if (account.getBalance().compareTo(amount) < 0) {
-                throw new InsufficientFundsException("Insufficient funds for withdrawal.");
+                throw new InsufficientFundsException("Insufficient funds to process transaction.");
             }
             account.setBalance(account.getBalance().subtract(amount));
         } else {
             throw new BadRequestException("Invalid transaction type: " + type);
         }
 
-        accountRepository.save(account); // Save updated account balance
+        accountRepository.save(account);
 
         Transaction transaction = new Transaction();
+        transaction.setId("tan-" + UUID.randomUUID().toString().substring(0, 8));
         transaction.setAmount(amount);
+        transaction.setCurrency(request.getCurrency());
         transaction.setType(type);
-        transaction.setTimestamp(LocalDateTime.now());
+        transaction.setReference(request.getReference());
+        transaction.setUserId(authenticatedUserId);
+        transaction.setCreatedTimestamp(LocalDateTime.now());
         transaction.setAccount(account);
+
         return transactionRepository.save(transaction);
     }
 
-    public List<Transaction> getTransactionsByAccountId(Long accountId, Long userId) {
-        accountRepository.findByIdAndUserId(accountId, userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Account not found or not associated with your user."));
-        return transactionRepository.findByAccountId(accountId);
+    public List<Transaction> getTransactionsByAccountNumber(String accountNumber, String authenticatedUserId) {
+        accountRepository.findByAccountNumberAndUserId(accountNumber, authenticatedUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("Bank account was not found or not associated with your user."));
+
+        return transactionRepository.findByAccountAccountNumber(accountNumber);
     }
 
-    public Transaction getTransactionByIdAndAccountId(Long transactionId, Long accountId, Long userId) {
-        accountRepository.findByIdAndUserId(accountId, userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Account not found or not associated with your user."));
+    public Transaction getTransactionByIdAndAccountNumber(String transactionId, String accountNumber, String authenticatedUserId) {
+        accountRepository.findByAccountNumberAndUserId(accountNumber, authenticatedUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("Bank account was not found or not associated with your user."));
 
-        return transactionRepository.findByIdAndAccountId(transactionId, accountId)
-                .orElseThrow(() -> new ResourceNotFoundException("Transaction not found for this account."));
+        return transactionRepository.findByIdAndAccountAccountNumber(transactionId, accountNumber)
+                .orElseThrow(() -> new ResourceNotFoundException("Transaction was not found."));
     }
 }
