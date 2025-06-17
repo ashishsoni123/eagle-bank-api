@@ -28,11 +28,11 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public User getUserById(Long userId, Long authenticatedUserId) {
+    public User getUserById(Long userId, String authenticatedUsername) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
 
-        if (!userId.equals(authenticatedUserId)) {
+        if (!user.getUsername().equals(authenticatedUsername)) {
             throw new ForbiddenException("You are not authorized to view this user's details.");
         }
         return user;

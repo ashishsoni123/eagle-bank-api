@@ -34,6 +34,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/v1/users").permitAll() // Allow user creation without authentication
                         .requestMatchers("/v1/auth/**").permitAll() // Allow authentication endpoint
+                        .requestMatchers("/h2-console/**").permitAll() // Allow authentication endpoint
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
@@ -57,8 +58,8 @@ public class SecurityConfig {
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(customUserDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder());
+        authProvider.setUserDetailsService(customUserDetailsService); // Uses your CustomUserDetailsService
+        authProvider.setPasswordEncoder(passwordEncoder()); // Uses your BCryptPasswordEncoder
         return authProvider;
     }
 }
