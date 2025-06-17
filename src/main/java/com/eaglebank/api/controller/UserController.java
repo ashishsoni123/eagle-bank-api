@@ -7,12 +7,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
 import java.security.Principal;
 
 @RestController
@@ -31,7 +27,7 @@ public class UserController {
     @GetMapping("/{userId}")
     public ResponseEntity<User> getUserById(@PathVariable Long userId, Principal principal) {
         // Get authenticated user ID from Principal or SecurityContextHolder
-        Long authenticatedUserId = Long.valueOf(principal.getName()); // Assuming username is the user ID
+        String authenticatedUserId = principal.getName(); // Assuming username is the user ID
 
         User user = userService.getUserById(userId, authenticatedUserId);
         return ResponseEntity.ok(user);
