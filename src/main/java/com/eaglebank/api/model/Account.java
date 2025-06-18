@@ -34,7 +34,7 @@ public class Account {
     private String accountNumber;
 
     @NotBlank(message = "Sort code cannot be blank")
-    @Pattern(regexp = "10-10-10", message = "Sort code must be '10-10-10'")
+    @Pattern(regexp = "^\\d{2}-\\d{2}-\\d{2}$", message = "Sort code must be in format xx-xx-xx where x is a digit")
     private String sortCode;
 
     @NotBlank(message = "Account name cannot be blank")
