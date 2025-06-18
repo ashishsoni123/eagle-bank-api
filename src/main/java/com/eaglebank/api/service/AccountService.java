@@ -13,7 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Random;
+
+import static com.eaglebank.api.util.AccountUtils.generateSortCode;
+import static com.eaglebank.api.util.AccountUtils.generateUniqueAccountNumber;
 
 @Service
 @RequiredArgsConstructor
@@ -22,7 +24,6 @@ public class AccountService {
     public static final String GBP = "GBP";
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
-    private static final Random RANDOM = new Random();
 
     @Transactional
     public Account createAccount(String userId, CreateBankAccountRequest request) {
@@ -71,23 +72,5 @@ public class AccountService {
                 .orElseThrow(() -> new ResourceNotFoundException("Bank account was not found or not associated with your user."));
 
         accountRepository.delete(account);
-    }
-
-    private String generateUniqueAccountNumber() {
-        StringBuilder sb = new StringBuilder("01");
-        for (int i = 0; i < 6; i++) {
-            sb.append(RANDOM.nextInt(10));
-        }
-        return sb.toString();
-    }
-
-    private String generateSortCode() {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 3; i++) {
-            if (i > 0) sb.append("-");
-            int part = RANDOM.nextInt(90) + 10; // ensures two digits, not starting with 0
-            sb.append(part);
-        }
-        return sb.toString();
     }
 }
