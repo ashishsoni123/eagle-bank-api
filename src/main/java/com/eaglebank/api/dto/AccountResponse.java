@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class BankAccountResponse {
+public class AccountResponse {
     private String accountNumber; // Matches pattern: ^01\d{6}$
     private String sortCode; // Matches enum: "10-10-10"
     private String name;

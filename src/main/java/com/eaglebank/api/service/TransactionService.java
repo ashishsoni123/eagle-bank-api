@@ -21,6 +21,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class TransactionService {
 
+    public static final String DEPOSIT = "deposit";
+    public static final String WITHDRAWAL = "withdrawal";
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
 
@@ -32,9 +34,9 @@ public class TransactionService {
         BigDecimal amount = request.getAmount();
         String type = request.getType();
 
-        if (type.equalsIgnoreCase("deposit")) {
+        if (type.equalsIgnoreCase(DEPOSIT)) {
             account.setBalance(account.getBalance().add(amount));
-        } else if (type.equalsIgnoreCase("withdrawal")) {
+        } else if (type.equalsIgnoreCase(WITHDRAWAL)) {
             if (account.getBalance().compareTo(amount) < 0) {
                 throw new InsufficientFundsException("Insufficient funds to process transaction.");
             }

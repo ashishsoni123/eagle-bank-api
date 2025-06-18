@@ -1,15 +1,16 @@
 package com.eaglebank.api.controller;
 
-import com.eaglebank.api.dto.BankAccountResponse;
-import com.eaglebank.api.dto.CreateBankAccountRequest;
-import com.eaglebank.api.dto.ListBankAccountsResponse;
-import com.eaglebank.api.dto.UpdateBankAccountRequest;
+import com.eaglebank.api.dto.AccountResponse;
+import com.eaglebank.api.dto.CreateAccountRequest;
+import com.eaglebank.api.dto.AccountsResponse;
+import com.eaglebank.api.dto.UpdateAccountRequest;
 import com.eaglebank.api.model.Account;
 import com.eaglebank.api.repository.UserRepository;
 import com.eaglebank.api.service.AccountService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,84 +29,57 @@ public class AccountController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public BankAccountResponse createAccount(
-            @Valid @RequestBody CreateBankAccountRequest request,
+    public AccountResponse createAccount(
+            @Valid @RequestBody CreateAccountRequest request,
             HttpServletRequest httpServletRequest) {
-
 
         String authenticatedUserId = (String) httpServletRequest.getAttribute(AUTHENTICATED_USER_ID);
         Account createdAccount = accountService.createAccount(authenticatedUserId, request);
-        return new BankAccountResponse(
-                createdAccount.getAccountNumber(),
-                createdAccount.getSortCode(),
-                createdAccount.getName(),
-                createdAccount.getAccountType(),
-                createdAccount.getBalance(),
-                createdAccount.getCurrency(),
-                createdAccount.getCreatedTimestamp(),
-                createdAccount.getUpdatedTimestamp()
-        );
+        AccountResponse response = new AccountResponse();
+        BeanUtils.copyProperties(createdAccount, response);
+        return response;
     }
 
     @GetMapping
-    public ListBankAccountsResponse listAccounts(HttpServletRequest request) {
+    public AccountsResponse listAccounts(HttpServletRequest request) {
 
         String authenticatedUserId = (String) request.getAttribute(AUTHENTICATED_USER_ID);
         List<Account> accounts = accountService.getAccountsByUserId(authenticatedUserId);
-        List<BankAccountResponse> accountResponses = accounts.stream()
-                .map(account -> new BankAccountResponse(
-                        account.getAccountNumber(),
-                        account.getSortCode(),
-                        account.getName(),
-                        account.getAccountType(),
-                        account.getBalance(),
-                        account.getCurrency(),
-                        account.getCreatedTimestamp(),
-                        account.getUpdatedTimestamp()
-                ))
+        List<AccountResponse> accountResponses = accounts.stream()
+                .map(account -> {
+                    AccountResponse response = new AccountResponse();
+                    BeanUtils.copyProperties(account, response);
+                    return response;
+                })
                 .collect(Collectors.toList());
-        return new ListBankAccountsResponse(accountResponses);
+        return new AccountsResponse(accountResponses);
     }
 
     @GetMapping("/{accountNumber}")
-    public BankAccountResponse fetchAccountByAccountNumber(
+    public AccountResponse fetchAccountByAccountNumber(
             @PathVariable String accountNumber,
             HttpServletRequest request) {
 
 
         String authenticatedUserId = (String) request.getAttribute(AUTHENTICATED_USER_ID);
         Account account = accountService.getAccountByAccountNumberAndUserId(accountNumber, authenticatedUserId);
-        return new BankAccountResponse(
-                account.getAccountNumber(),
-                account.getSortCode(),
-                account.getName(),
-                account.getAccountType(),
-                account.getBalance(),
-                account.getCurrency(),
-                account.getCreatedTimestamp(),
-                account.getUpdatedTimestamp()
-        );
+        AccountResponse response = new AccountResponse();
+        BeanUtils.copyProperties(account, response);
+        return response;
     }
 
     @PatchMapping("/{accountNumber}")
-    public BankAccountResponse updateAccountByAccountNumber(
+    public AccountResponse updateAccountByAccountNumber(
             @PathVariable String accountNumber,
             HttpServletRequest request,
-            @Valid @RequestBody UpdateBankAccountRequest updateBankAccountRequest) {
+            @Valid @RequestBody UpdateAccountRequest updateAccountRequest) {
 
         String authenticatedUserId = (String) request.getAttribute(AUTHENTICATED_USER_ID);
 
-        Account updatedAccount = accountService.updateAccount(accountNumber, authenticatedUserId, updateBankAccountRequest);
-        return new BankAccountResponse(
-                updatedAccount.getAccountNumber(),
-                updatedAccount.getSortCode(),
-                updatedAccount.getName(),
-                updatedAccount.getAccountType(),
-                updatedAccount.getBalance(),
-                updatedAccount.getCurrency(),
-                updatedAccount.getCreatedTimestamp(),
-                updatedAccount.getUpdatedTimestamp()
-        );
+        Account updatedAccount = accountService.updateAccount(accountNumber, authenticatedUserId, updateAccountRequest);
+        AccountResponse response = new AccountResponse();
+        BeanUtils.copyProperties(updatedAccount, response);
+        return response;
     }
 
     @DeleteMapping("/{accountNumber}")

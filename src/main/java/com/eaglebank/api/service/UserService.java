@@ -1,6 +1,7 @@
 package com.eaglebank.api.service;
 
-import com.eaglebank.api.dto.UserRequest;
+import com.eaglebank.api.dto.CreateUserRequest;
+import com.eaglebank.api.dto.UpdateUserRequest;
 import com.eaglebank.api.exceptiom.BadRequestException;
 import com.eaglebank.api.exceptiom.ConflictException;
 import com.eaglebank.api.exceptiom.ForbiddenException;
@@ -8,6 +9,7 @@ import com.eaglebank.api.exceptiom.ResourceNotFoundException;
 import com.eaglebank.api.model.User;
 import com.eaglebank.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +24,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public User createUser(UserRequest request) {
+    public User createUser(CreateUserRequest request) {
         String internalUsername = request.getEmail();
 
         if (userRepository.existsByUsername(internalUsername)) {
@@ -45,18 +47,18 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
 
-        if (!userId.equals(authenticatedUserId)) {
+        if (!userId.equalsIgnoreCase(authenticatedUserId)) {
             throw new ForbiddenException("The user is not allowed to access the user details.");
         }
         return user;
     }
 
     @Transactional
-    public User updateUser(String userId, String authenticatedUserId, UserRequest request) {
+    public User updateUser(String userId, String authenticatedUserId, UpdateUserRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
 
-        if (!userId.equals(authenticatedUserId)) {
+        if (!userId.equalsIgnoreCase(authenticatedUserId)) {
             throw new ForbiddenException("The user is not allowed to update the user details.");
         }
 
@@ -66,20 +68,20 @@ public class UserService {
             throw new BadRequestException("User with this email already exists.");
         }
 
-        if (request.getName() != null && !request.getName().isBlank()) {
+        if (StringUtils.isNotBlank(request.getName())) {
             user.setName(request.getName());
         }
         if (request.getAddress() != null) {
             user.setAddress(request.getAddress());
         }
-        if (request.getPhoneNumber() != null && !request.getPhoneNumber().isBlank()) {
+        if (StringUtils.isNotBlank(request.getPhoneNumber())) {
             user.setPhoneNumber(request.getPhoneNumber());
         }
-        if (request.getEmail() != null && !request.getEmail().isBlank()) {
+        if (StringUtils.isNotBlank(request.getEmail())) {
             user.setEmail(request.getEmail());
             user.setUsername(request.getEmail());
         }
-        if (request.getPassword() != null && !request.getPassword().isBlank()) {
+        if (StringUtils.isNotBlank(request.getPassword())) {
             user.setPassword(passwordEncoder.encode(request.getPassword()));
         }
 

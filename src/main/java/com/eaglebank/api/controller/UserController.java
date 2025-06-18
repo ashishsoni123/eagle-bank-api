@@ -1,6 +1,7 @@
 package com.eaglebank.api.controller;
 
-import com.eaglebank.api.dto.UserRequest;
+import com.eaglebank.api.dto.CreateUserRequest;
+import com.eaglebank.api.dto.UpdateUserRequest;
 import com.eaglebank.api.dto.UserResponse;
 import com.eaglebank.api.model.User;
 import com.eaglebank.api.repository.UserRepository;
@@ -8,6 +9,7 @@ import com.eaglebank.api.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,17 +25,11 @@ public class UserController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserResponse createUser(@Valid @RequestBody UserRequest request) {
+    public UserResponse createUser(@Valid @RequestBody CreateUserRequest request) {
         User createdUser = userService.createUser(request);
-        return new UserResponse(
-                createdUser.getId(),
-                createdUser.getName(),
-                createdUser.getAddress(),
-                createdUser.getPhoneNumber(),
-                createdUser.getEmail(),
-                createdUser.getCreatedTimestamp(),
-                createdUser.getUpdatedTimestamp()
-        );
+        UserResponse response = new UserResponse();
+        BeanUtils.copyProperties(createdUser, response);
+        return response;
     }
 
     @GetMapping("/{userId}")
@@ -41,34 +37,22 @@ public class UserController {
         String authenticatedUserId = (String) request.getAttribute(AUTHENTICATED_USER_ID);
 
         User user = userService.getUserById(userId, authenticatedUserId);
-        return new UserResponse(
-                user.getId(),
-                user.getName(),
-                user.getAddress(),
-                user.getPhoneNumber(),
-                user.getEmail(),
-                user.getCreatedTimestamp(),
-                user.getUpdatedTimestamp()
-        );
+        UserResponse response = new UserResponse();
+        BeanUtils.copyProperties(user, response);
+        return response;
     }
 
     @PatchMapping("/{userId}")
     public UserResponse updateUserByID(
             @PathVariable String userId,
             HttpServletRequest request,
-            @Valid @RequestBody UserRequest updateUserRequest) {
+            @Valid @RequestBody UpdateUserRequest updateUserRequest) {
 
         String authenticatedUserId = (String) request.getAttribute(AUTHENTICATED_USER_ID);
         User updatedUser = userService.updateUser(userId, authenticatedUserId, updateUserRequest);
-        return new UserResponse(
-                updatedUser.getId(),
-                updatedUser.getName(),
-                updatedUser.getAddress(),
-                updatedUser.getPhoneNumber(),
-                updatedUser.getEmail(),
-                updatedUser.getCreatedTimestamp(),
-                updatedUser.getUpdatedTimestamp()
-        );
+        UserResponse response = new UserResponse();
+        BeanUtils.copyProperties(updatedUser, response);
+        return response;
     }
 
     @DeleteMapping("/{userId}")

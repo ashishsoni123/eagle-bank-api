@@ -1,13 +1,14 @@
 package com.eaglebank.api.service;
 
-import com.eaglebank.api.dto.CreateBankAccountRequest;
-import com.eaglebank.api.dto.UpdateBankAccountRequest;
+import com.eaglebank.api.dto.CreateAccountRequest;
+import com.eaglebank.api.dto.UpdateAccountRequest;
 import com.eaglebank.api.exceptiom.ResourceNotFoundException;
 import com.eaglebank.api.model.Account;
 import com.eaglebank.api.model.User;
 import com.eaglebank.api.repository.AccountRepository;
 import com.eaglebank.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +27,7 @@ public class AccountService {
     private final UserRepository userRepository;
 
     @Transactional
-    public Account createAccount(String userId, CreateBankAccountRequest request) {
+    public Account createAccount(String userId, CreateAccountRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
 
@@ -52,14 +53,14 @@ public class AccountService {
     }
 
     @Transactional
-    public Account updateAccount(String accountNumber, String authenticatedUserId, UpdateBankAccountRequest request) {
+    public Account updateAccount(String accountNumber, String authenticatedUserId, UpdateAccountRequest request) {
         Account account = accountRepository.findByAccountNumberAndUserId(accountNumber, authenticatedUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("Bank account was not found or not associated with your user."));
 
-        if (request.getName() != null && !request.getName().isBlank()) {
+        if (StringUtils.isNotBlank(request.getName()))  {
             account.setName(request.getName());
         }
-        if (request.getAccountType() != null && !request.getAccountType().isBlank()) {
+        if (StringUtils.isNotBlank(request.getAccountType())) {
             account.setAccountType(request.getAccountType());
         }
 

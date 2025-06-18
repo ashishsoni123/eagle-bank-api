@@ -4,7 +4,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 @Data
-public class UpdateBankAccountRequest {
+public class UpdateAccountRequest {
     private String name;
     @Pattern(regexp = "personal", message = "Account type must be 'personal'")
     private String accountType;

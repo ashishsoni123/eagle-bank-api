@@ -1,7 +1,7 @@
 package com.eaglebank.api.service;
 
-import com.eaglebank.api.dto.CreateBankAccountRequest;
-import com.eaglebank.api.dto.UpdateBankAccountRequest;
+import com.eaglebank.api.dto.CreateAccountRequest;
+import com.eaglebank.api.dto.UpdateAccountRequest;
 import com.eaglebank.api.exceptiom.ResourceNotFoundException;
 import com.eaglebank.api.model.Account;
 import com.eaglebank.api.model.User;
@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -61,7 +62,7 @@ public class AccountServiceTest {
     @Test
     void createAccount_Success() {
         // Arrange
-        CreateBankAccountRequest request = new CreateBankAccountRequest();
+        CreateAccountRequest request = new CreateAccountRequest();
         request.setName("Test Account");
         request.setAccountType("SAVINGS");
 
@@ -84,7 +85,7 @@ public class AccountServiceTest {
     @Test
     void createAccount_UserNotFound() {
         // Arrange
-        CreateBankAccountRequest request = new CreateBankAccountRequest();
+        CreateAccountRequest request = new CreateAccountRequest();
         when(userRepository.findById(userId)).thenReturn(Optional.empty());
 
         // Act & Assert
@@ -96,7 +97,7 @@ public class AccountServiceTest {
     @Test
     void getAccountsByUserId_Success() {
         // Arrange
-        List<Account> accounts = Arrays.asList(testAccount);
+        List<Account> accounts = Collections.singletonList(testAccount);
         when(accountRepository.findByUserId(userId)).thenReturn(accounts);
 
         // Act
@@ -139,7 +140,7 @@ public class AccountServiceTest {
     @Test
     void updateAccount_Success() {
         // Arrange
-        UpdateBankAccountRequest request = new UpdateBankAccountRequest();
+        UpdateAccountRequest request = new UpdateAccountRequest();
         request.setName("Updated Account Name");
         request.setAccountType("CURRENT");
 
@@ -161,7 +162,7 @@ public class AccountServiceTest {
     @Test
     void updateAccount_NotFound() {
         // Arrange
-        UpdateBankAccountRequest request = new UpdateBankAccountRequest();
+        UpdateAccountRequest request = new UpdateAccountRequest();
         when(accountRepository.findByAccountNumberAndUserId(accountNumber, userId))
                 .thenReturn(Optional.empty());
 

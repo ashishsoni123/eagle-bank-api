@@ -9,6 +9,6 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ListTransactionsResponse {
+public class TransactionsResponse {
     private List<TransactionResponse> transactions;
 }

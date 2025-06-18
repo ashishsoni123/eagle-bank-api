@@ -1,7 +1,8 @@
 package com.eaglebank.api.service;
 
-import com.eaglebank.api.dto.UserRequest;
 import com.eaglebank.api.dto.Address;
+import com.eaglebank.api.dto.CreateUserRequest;
+import com.eaglebank.api.dto.UpdateUserRequest;
 import com.eaglebank.api.exceptiom.BadRequestException;
 import com.eaglebank.api.exceptiom.ConflictException;
 import com.eaglebank.api.exceptiom.ForbiddenException;
@@ -39,8 +40,8 @@ public class UserServiceTest {
     private UserService userService;
 
     private User testUser;
-    private UserRequest userRequest;
-    private UserRequest updateUserRequest;
+    private CreateUserRequest userRequest;
+    private UpdateUserRequest updateUserRequest;
     private String userId;
     private String hashedPassword;
 
@@ -58,7 +59,7 @@ public class UserServiceTest {
         testUser.setPhoneNumber("+44123456789");
         testUser.setAccounts(new ArrayList<>());
 
-        userRequest = new UserRequest();
+        userRequest = new CreateUserRequest();
         userRequest.setEmail("test@example.com");
         userRequest.setPassword("password123");
         userRequest.setName("Test User");
@@ -70,7 +71,7 @@ public class UserServiceTest {
         address.setPostcode("12345");
         userRequest.setAddress(address);
 
-        updateUserRequest = new UserRequest();
+        updateUserRequest = new UpdateUserRequest();
         updateUserRequest.setName("Updated Name");
         updateUserRequest.setEmail("updated@example.com");
         updateUserRequest.setPhoneNumber("+44987654321");

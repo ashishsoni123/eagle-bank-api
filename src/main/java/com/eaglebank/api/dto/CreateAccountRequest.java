@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 @Data
-public class CreateBankAccountRequest {
+public class CreateAccountRequest {
     @NotBlank(message = "Account name cannot be blank")
     private String name;
 
