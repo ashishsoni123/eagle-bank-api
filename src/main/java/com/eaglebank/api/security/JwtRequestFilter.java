@@ -1,5 +1,7 @@
 package com.eaglebank.api.security;
 
+import com.eaglebank.api.model.User;
+import com.eaglebank.api.repository.UserRepository;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -19,8 +21,10 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtRequestFilter extends OncePerRequestFilter {
 
+    public static final String AUTHENTICATED_USER_ID = "authenticatedUserId";
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService userDetailsService;
+    private final UserRepository userRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
@@ -52,8 +56,13 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 usernamePasswordAuthenticationToken
                         .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+                User user = userRepository.findByUsername(username)
+                        .orElseThrow(() -> new RuntimeException("Authenticated user not found in DB."));
+                request.setAttribute(AUTHENTICATED_USER_ID, user.getId());
             }
         }
         chain.doFilter(request, response);
     }
+
+
 }

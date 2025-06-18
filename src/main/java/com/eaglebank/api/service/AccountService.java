@@ -19,6 +19,7 @@ import java.util.Random;
 @RequiredArgsConstructor
 public class AccountService {
 
+    public static final String GBP = "GBP";
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
     private static final Random RANDOM = new Random();
@@ -30,11 +31,11 @@ public class AccountService {
 
         Account account = new Account();
         account.setAccountNumber(generateUniqueAccountNumber());
-        account.setSortCode("10-10-10");
+        account.setSortCode(generateSortCode());
         account.setName(request.getName());
         account.setAccountType(request.getAccountType());
         account.setBalance(BigDecimal.ZERO);
-        account.setCurrency("GBP");
+        account.setCurrency(GBP);
         account.setUser(user);
 
         return accountRepository.save(account);
@@ -76,6 +77,16 @@ public class AccountService {
         StringBuilder sb = new StringBuilder("01");
         for (int i = 0; i < 6; i++) {
             sb.append(RANDOM.nextInt(10));
+        }
+        return sb.toString();
+    }
+
+    private String generateSortCode() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < 3; i++) {
+            if (i > 0) sb.append("-");
+            int part = RANDOM.nextInt(90) + 10; // ensures two digits, not starting with 0
+            sb.append(part);
         }
         return sb.toString();
     }

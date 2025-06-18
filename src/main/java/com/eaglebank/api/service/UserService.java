@@ -61,6 +61,12 @@ public class UserService {
             throw new ForbiddenException("The user is not allowed to update the user details.");
         }
 
+        String internalUsername = request.getEmail();
+
+        if (userRepository.existsByUsername(internalUsername)) {
+            throw new BadRequestException("User with this email already exists.");
+        }
+
         if (request.getName() != null && !request.getName().isBlank()) {
             user.setName(request.getName());
         }

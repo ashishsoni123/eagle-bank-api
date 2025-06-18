@@ -6,14 +6,14 @@ import com.eaglebank.api.dto.UserResponse;
 import com.eaglebank.api.model.User;
 import com.eaglebank.api.repository.UserRepository;
 import com.eaglebank.api.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
-import java.util.Optional;
+import static com.eaglebank.api.security.JwtRequestFilter.AUTHENTICATED_USER_ID;
 
 @RestController
 @RequestMapping("/v1/users")
@@ -39,10 +39,8 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<UserResponse> fetchUserByID(@PathVariable String userId, Principal principal) {
-        Optional<User> authenticatedUser = userRepository.findByUsername(principal.getName());
-        String authenticatedUserId = authenticatedUser.map(User::getId)
-                .orElseThrow(() -> new RuntimeException("Authenticated user not found in DB. This should not happen."));
+    public ResponseEntity<UserResponse> fetchUserByID(@PathVariable String userId, HttpServletRequest request) {
+        String authenticatedUserId = (String) request.getAttribute(AUTHENTICATED_USER_ID);
 
         User user = userService.getUserById(userId, authenticatedUserId);
         UserResponse response = new UserResponse(
@@ -60,14 +58,12 @@ public class UserController {
     @PatchMapping("/{userId}")
     public ResponseEntity<UserResponse> updateUserByID(
             @PathVariable String userId,
-            Principal principal,
-            @Valid @RequestBody UpdateUserRequest request) {
+            HttpServletRequest request,
+            @Valid @RequestBody UpdateUserRequest updateUserRequest) {
 
-        Optional<User> authenticatedUser = userRepository.findByUsername(principal.getName());
-        String authenticatedUserId = authenticatedUser.map(User::getId)
-                .orElseThrow(() -> new RuntimeException("Authenticated user not found in DB. This should not happen."));
-
-        User updatedUser = userService.updateUser(userId, authenticatedUserId, request);
+      
+        String authenticatedUserId = (String) request.getAttribute(AUTHENTICATED_USER_ID);
+        User updatedUser = userService.updateUser(userId, authenticatedUserId, updateUserRequest);
         UserResponse response = new UserResponse(
                 updatedUser.getId(),
                 updatedUser.getName(),
@@ -81,11 +77,9 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}")
-    public ResponseEntity<Void> deleteUserByID(@PathVariable String userId, Principal principal) {
-        Optional<User> authenticatedUser = userRepository.findByUsername(principal.getName());
-        String authenticatedUserId = authenticatedUser.map(User::getId)
-                .orElseThrow(() -> new RuntimeException("Authenticated user not found in DB. This should not happen."));
+    public ResponseEntity<Void> deleteUserByID(@PathVariable String userId, HttpServletRequest request) {
 
+        String authenticatedUserId = (String) request.getAttribute(AUTHENTICATED_USER_ID);
         userService.deleteUser(userId, authenticatedUserId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

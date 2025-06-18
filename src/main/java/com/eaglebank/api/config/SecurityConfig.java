@@ -34,7 +34,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/v1/users").permitAll() // Allow user creation without authentication
                         .requestMatchers("/v1/auth/**").permitAll() // Allow authentication endpoint
-                        .requestMatchers("/h2-console/**").permitAll() // Allow authentication endpoint
+                        .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()// Allow authentication endpoint
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

@@ -1,5 +1,6 @@
 package com.eaglebank.api.service;
 
+import com.eaglebank.api.exceptiom.ForbiddenException;
 import com.eaglebank.api.security.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,7 +24,7 @@ public class AuthService {
 
             return jwtUtil.generateToken(authentication.getName());
         } catch (AuthenticationException e) {
-            throw new RuntimeException("Invalid username or password", e);
+            throw new ForbiddenException("Invalid username or password");
         }
     }
 }

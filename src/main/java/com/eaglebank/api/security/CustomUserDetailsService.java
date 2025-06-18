@@ -1,5 +1,6 @@
 package com.eaglebank.api.security;
 
+import com.eaglebank.api.exceptiom.ForbiddenException;
 import com.eaglebank.api.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.User;
@@ -20,7 +21,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         // Fetch the user from your database using UserRepository
         com.eaglebank.api.model.User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
+                .orElseThrow(() -> new ForbiddenException("User not found with username: " + username));
 
         // Build and return a Spring Security User object
         // The password should be the BCrypt encoded password from the database
