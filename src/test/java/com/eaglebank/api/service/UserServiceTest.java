@@ -1,7 +1,6 @@
 package com.eaglebank.api.service;
 
-import com.eaglebank.api.dto.CreateUserRequest;
-import com.eaglebank.api.dto.UpdateUserRequest;
+import com.eaglebank.api.dto.UserRequest;
 import com.eaglebank.api.dto.Address;
 import com.eaglebank.api.exceptiom.BadRequestException;
 import com.eaglebank.api.exceptiom.ConflictException;
@@ -40,8 +39,8 @@ public class UserServiceTest {
     private UserService userService;
 
     private User testUser;
-    private CreateUserRequest createUserRequest;
-    private UpdateUserRequest updateUserRequest;
+    private UserRequest userRequest;
+    private UserRequest updateUserRequest;
     private String userId;
     private String hashedPassword;
 
@@ -59,19 +58,19 @@ public class UserServiceTest {
         testUser.setPhoneNumber("+44123456789");
         testUser.setAccounts(new ArrayList<>());
 
-        createUserRequest = new CreateUserRequest();
-        createUserRequest.setEmail("test@example.com");
-        createUserRequest.setPassword("password123");
-        createUserRequest.setName("Test User");
-        createUserRequest.setPhoneNumber("+44123456789");
+        userRequest = new UserRequest();
+        userRequest.setEmail("test@example.com");
+        userRequest.setPassword("password123");
+        userRequest.setName("Test User");
+        userRequest.setPhoneNumber("+44123456789");
 
         Address address = new Address();
         address.setLine1("123 Test St");
         address.setTown("Test City");
         address.setPostcode("12345");
-        createUserRequest.setAddress(address);
+        userRequest.setAddress(address);
 
-        updateUserRequest = new UpdateUserRequest();
+        updateUserRequest = new UserRequest();
         updateUserRequest.setName("Updated Name");
         updateUserRequest.setEmail("updated@example.com");
         updateUserRequest.setPhoneNumber("+44987654321");
@@ -85,7 +84,7 @@ public class UserServiceTest {
         when(userRepository.save(any(User.class))).thenReturn(testUser);
 
         // Act
-        User result = userService.createUser(createUserRequest);
+        User result = userService.createUser(userRequest);
 
         // Assert
         assertNotNull(result);
@@ -102,7 +101,7 @@ public class UserServiceTest {
 
         // Act & Assert
         assertThrows(BadRequestException.class,
-                () -> userService.createUser(createUserRequest));
+                () -> userService.createUser(userRequest));
         verify(userRepository, never()).save(any());
     }
 

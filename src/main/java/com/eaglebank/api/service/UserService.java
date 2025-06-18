@@ -1,7 +1,6 @@
 package com.eaglebank.api.service;
 
-import com.eaglebank.api.dto.CreateUserRequest;
-import com.eaglebank.api.dto.UpdateUserRequest;
+import com.eaglebank.api.dto.UserRequest;
 import com.eaglebank.api.exceptiom.BadRequestException;
 import com.eaglebank.api.exceptiom.ConflictException;
 import com.eaglebank.api.exceptiom.ForbiddenException;
@@ -23,7 +22,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public User createUser(CreateUserRequest request) {
+    public User createUser(UserRequest request) {
         String internalUsername = request.getEmail();
 
         if (userRepository.existsByUsername(internalUsername)) {
@@ -53,7 +52,7 @@ public class UserService {
     }
 
     @Transactional
-    public User updateUser(String userId, String authenticatedUserId, UpdateUserRequest request) {
+    public User updateUser(String userId, String authenticatedUserId, UserRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
 

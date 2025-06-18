@@ -10,7 +10,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,7 +26,8 @@ public class TransactionController {
     private final UserRepository userRepository;
 
     @PostMapping
-    public ResponseEntity<TransactionResponse> createTransaction(
+    @ResponseStatus(HttpStatus.CREATED)
+    public TransactionResponse createTransaction(
             @PathVariable String accountNumber,
             @Valid @RequestBody CreateTransactionRequest createTransactionRequest,
             HttpServletRequest request) {
@@ -35,7 +35,7 @@ public class TransactionController {
         String authenticatedUserId = (String) request.getAttribute(AUTHENTICATED_USER_ID);
 
         Transaction createdTransaction = transactionService.performTransaction(accountNumber, authenticatedUserId, createTransactionRequest);
-        TransactionResponse response = new TransactionResponse(
+        return new TransactionResponse(
                 createdTransaction.getId(),
                 createdTransaction.getAmount(),
                 createdTransaction.getCurrency(),
@@ -44,11 +44,10 @@ public class TransactionController {
                 createdTransaction.getUserId(),
                 createdTransaction.getCreatedTimestamp()
         );
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<ListTransactionsResponse> listAccountTransactions(
+    public ListTransactionsResponse listAccountTransactions(
             @PathVariable String accountNumber,
             HttpServletRequest request) {
 
@@ -66,11 +65,11 @@ public class TransactionController {
                         transaction.getCreatedTimestamp()
                 ))
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(new ListTransactionsResponse(transactionResponses));
+        return new ListTransactionsResponse(transactionResponses);
     }
 
     @GetMapping("/{transactionId}")
-    public ResponseEntity<TransactionResponse> fetchAccountTransactionByID(
+    public TransactionResponse fetchAccountTransactionByID(
             @PathVariable String accountNumber,
             @PathVariable String transactionId,
             HttpServletRequest request) {
@@ -78,7 +77,7 @@ public class TransactionController {
 
         String authenticatedUserId = (String) request.getAttribute(AUTHENTICATED_USER_ID);
         Transaction transaction = transactionService.getTransactionByIdAndAccountNumber(transactionId, accountNumber, authenticatedUserId);
-        TransactionResponse response = new TransactionResponse(
+        return new TransactionResponse(
                 transaction.getId(),
                 transaction.getAmount(),
                 transaction.getCurrency(),
@@ -87,6 +86,5 @@ public class TransactionController {
                 transaction.getUserId(),
                 transaction.getCreatedTimestamp()
         );
-        return ResponseEntity.ok(response);
     }
 }

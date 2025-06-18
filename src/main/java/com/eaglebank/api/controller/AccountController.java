@@ -11,7 +11,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,14 +27,15 @@ public class AccountController {
     private final UserRepository userRepository;
 
     @PostMapping
-    public ResponseEntity<BankAccountResponse> createAccount(
+    @ResponseStatus(HttpStatus.CREATED)
+    public BankAccountResponse createAccount(
             @Valid @RequestBody CreateBankAccountRequest request,
             HttpServletRequest httpServletRequest) {
 
 
         String authenticatedUserId = (String) httpServletRequest.getAttribute(AUTHENTICATED_USER_ID);
         Account createdAccount = accountService.createAccount(authenticatedUserId, request);
-        BankAccountResponse response = new BankAccountResponse(
+        return new BankAccountResponse(
                 createdAccount.getAccountNumber(),
                 createdAccount.getSortCode(),
                 createdAccount.getName(),
@@ -45,11 +45,10 @@ public class AccountController {
                 createdAccount.getCreatedTimestamp(),
                 createdAccount.getUpdatedTimestamp()
         );
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<ListBankAccountsResponse> listAccounts(HttpServletRequest request) {
+    public ListBankAccountsResponse listAccounts(HttpServletRequest request) {
 
         String authenticatedUserId = (String) request.getAttribute(AUTHENTICATED_USER_ID);
         List<Account> accounts = accountService.getAccountsByUserId(authenticatedUserId);
@@ -65,18 +64,18 @@ public class AccountController {
                         account.getUpdatedTimestamp()
                 ))
                 .collect(Collectors.toList());
-        return ResponseEntity.ok(new ListBankAccountsResponse(accountResponses));
+        return new ListBankAccountsResponse(accountResponses);
     }
 
     @GetMapping("/{accountNumber}")
-    public ResponseEntity<BankAccountResponse> fetchAccountByAccountNumber(
+    public BankAccountResponse fetchAccountByAccountNumber(
             @PathVariable String accountNumber,
             HttpServletRequest request) {
 
 
         String authenticatedUserId = (String) request.getAttribute(AUTHENTICATED_USER_ID);
         Account account = accountService.getAccountByAccountNumberAndUserId(accountNumber, authenticatedUserId);
-        BankAccountResponse response = new BankAccountResponse(
+        return new BankAccountResponse(
                 account.getAccountNumber(),
                 account.getSortCode(),
                 account.getName(),
@@ -86,11 +85,10 @@ public class AccountController {
                 account.getCreatedTimestamp(),
                 account.getUpdatedTimestamp()
         );
-        return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/{accountNumber}")
-    public ResponseEntity<BankAccountResponse> updateAccountByAccountNumber(
+    public BankAccountResponse updateAccountByAccountNumber(
             @PathVariable String accountNumber,
             HttpServletRequest request,
             @Valid @RequestBody UpdateBankAccountRequest updateBankAccountRequest) {
@@ -98,7 +96,7 @@ public class AccountController {
         String authenticatedUserId = (String) request.getAttribute(AUTHENTICATED_USER_ID);
 
         Account updatedAccount = accountService.updateAccount(accountNumber, authenticatedUserId, updateBankAccountRequest);
-        BankAccountResponse response = new BankAccountResponse(
+        return new BankAccountResponse(
                 updatedAccount.getAccountNumber(),
                 updatedAccount.getSortCode(),
                 updatedAccount.getName(),
@@ -108,17 +106,16 @@ public class AccountController {
                 updatedAccount.getCreatedTimestamp(),
                 updatedAccount.getUpdatedTimestamp()
         );
-        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{accountNumber}")
-    public ResponseEntity<Void> deleteAccountByAccountNumber(
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteAccountByAccountNumber(
             @PathVariable String accountNumber,
             HttpServletRequest request) {
 
         String authenticatedUserId = (String) request.getAttribute(AUTHENTICATED_USER_ID);
 
         accountService.deleteAccount(accountNumber, authenticatedUserId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

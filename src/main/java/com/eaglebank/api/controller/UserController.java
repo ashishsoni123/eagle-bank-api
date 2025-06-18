@@ -1,7 +1,6 @@
 package com.eaglebank.api.controller;
 
-import com.eaglebank.api.dto.CreateUserRequest;
-import com.eaglebank.api.dto.UpdateUserRequest;
+import com.eaglebank.api.dto.UserRequest;
 import com.eaglebank.api.dto.UserResponse;
 import com.eaglebank.api.model.User;
 import com.eaglebank.api.repository.UserRepository;
@@ -10,7 +9,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import static com.eaglebank.api.security.JwtRequestFilter.AUTHENTICATED_USER_ID;
@@ -24,9 +22,10 @@ public class UserController {
     private final UserRepository userRepository;
 
     @PostMapping
-    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserRequest request) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public UserResponse createUser(@Valid @RequestBody UserRequest request) {
         User createdUser = userService.createUser(request);
-        UserResponse response = new UserResponse(
+        return new UserResponse(
                 createdUser.getId(),
                 createdUser.getName(),
                 createdUser.getAddress(),
@@ -35,15 +34,14 @@ public class UserController {
                 createdUser.getCreatedTimestamp(),
                 createdUser.getUpdatedTimestamp()
         );
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<UserResponse> fetchUserByID(@PathVariable String userId, HttpServletRequest request) {
+    public UserResponse fetchUserByID(@PathVariable String userId, HttpServletRequest request) {
         String authenticatedUserId = (String) request.getAttribute(AUTHENTICATED_USER_ID);
 
         User user = userService.getUserById(userId, authenticatedUserId);
-        UserResponse response = new UserResponse(
+        return new UserResponse(
                 user.getId(),
                 user.getName(),
                 user.getAddress(),
@@ -52,19 +50,17 @@ public class UserController {
                 user.getCreatedTimestamp(),
                 user.getUpdatedTimestamp()
         );
-        return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/{userId}")
-    public ResponseEntity<UserResponse> updateUserByID(
+    public UserResponse updateUserByID(
             @PathVariable String userId,
             HttpServletRequest request,
-            @Valid @RequestBody UpdateUserRequest updateUserRequest) {
+            @Valid @RequestBody UserRequest updateUserRequest) {
 
-      
         String authenticatedUserId = (String) request.getAttribute(AUTHENTICATED_USER_ID);
         User updatedUser = userService.updateUser(userId, authenticatedUserId, updateUserRequest);
-        UserResponse response = new UserResponse(
+        return new UserResponse(
                 updatedUser.getId(),
                 updatedUser.getName(),
                 updatedUser.getAddress(),
@@ -73,14 +69,13 @@ public class UserController {
                 updatedUser.getCreatedTimestamp(),
                 updatedUser.getUpdatedTimestamp()
         );
-        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{userId}")
-    public ResponseEntity<Void> deleteUserByID(@PathVariable String userId, HttpServletRequest request) {
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteUserByID(@PathVariable String userId, HttpServletRequest request) {
 
         String authenticatedUserId = (String) request.getAttribute(AUTHENTICATED_USER_ID);
         userService.deleteUser(userId, authenticatedUserId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
