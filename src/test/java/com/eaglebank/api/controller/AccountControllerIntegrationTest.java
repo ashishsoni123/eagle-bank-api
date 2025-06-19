@@ -11,34 +11,23 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
 class AccountControllerIntegrationTest extends BaseIntegrationTest {
-    private String accountNumber;
-    String personal = "personal";
+
+    public static String PERSONAL = "personal";
 
     @BeforeEach
     void setup() {
        createTestUserAndAuthenticate();
         // Create a test account
-        CreateAccountRequest accountRequest = new CreateAccountRequest();
-        accountRequest.setName("Test Account");
-        accountRequest.setAccountType(personal);
-
-        accountNumber = given()
-            .contentType(ContentType.JSON)
-            .header("Authorization", "Bearer " + authToken)
-            .body(accountRequest)
-        .when()
-            .post("/v1/accounts")
-        .then()
-            .statusCode(HttpStatus.CREATED.value())
-            .extract()
-            .path("accountNumber");
+        createTestAccount();
     }
+
+
 
     @Test
     void whenCreateAccount_thenReturnsNewAccount() {
         CreateAccountRequest request = new CreateAccountRequest();
         request.setName("Second Account");
-        request.setAccountType(personal);
+        request.setAccountType(PERSONAL);
 
         given()
             .contentType(ContentType.JSON)
@@ -49,7 +38,7 @@ class AccountControllerIntegrationTest extends BaseIntegrationTest {
         .then()
             .statusCode(HttpStatus.CREATED.value())
             .body("name", equalTo("Second Account"))
-            .body("accountType", equalTo(personal))
+            .body("accountType", equalTo(PERSONAL))
             .body("currency", equalTo("GBP"))
             .body("balance", comparesEqualTo(0))
             .body("accountNumber", notNullValue())
@@ -85,7 +74,7 @@ class AccountControllerIntegrationTest extends BaseIntegrationTest {
             .statusCode(HttpStatus.OK.value())
             .body("accountNumber", equalTo(accountNumber))
             .body("name", equalTo("Test Account"))
-            .body("accountType", equalTo(personal))
+            .body("accountType", equalTo(PERSONAL))
             .body("currency", equalTo("GBP"));
     }
 

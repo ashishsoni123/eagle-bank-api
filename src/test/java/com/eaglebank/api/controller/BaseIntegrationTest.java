@@ -1,6 +1,7 @@
 package com.eaglebank.api.controller;
 
 import com.eaglebank.api.dto.Address;
+import com.eaglebank.api.dto.CreateAccountRequest;
 import com.eaglebank.api.dto.CreateUserRequest;
 import com.eaglebank.api.dto.LoginRequest;
 import io.restassured.RestAssured;
@@ -14,6 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.UUID;
 
+import static com.eaglebank.api.controller.AccountControllerIntegrationTest.PERSONAL;
 import static io.restassured.RestAssured.given;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -25,6 +27,7 @@ public abstract class BaseIntegrationTest {
 
     protected String authToken;
     protected String userId;
+    protected String accountNumber;
     protected  String TEST_EMAIL = "test." + UUID.randomUUID().toString().substring(0, 8) + "@example.com";
     protected static final String TEST_PASSWORD = "Test1234";
 
@@ -63,6 +66,23 @@ public abstract class BaseIntegrationTest {
                 .statusCode(HttpStatus.OK.value())
                 .extract()
                 .path("jwt");
+    }
+
+    protected void createTestAccount() {
+        CreateAccountRequest accountRequest = new CreateAccountRequest();
+        accountRequest.setName("Test Account");
+        accountRequest.setAccountType(PERSONAL);
+
+        accountNumber = given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + authToken)
+                .body(accountRequest)
+                .when()
+                .post("/v1/accounts")
+                .then()
+                .statusCode(HttpStatus.CREATED.value())
+                .extract()
+                .path("accountNumber");
     }
 
     protected @NotNull CreateUserRequest createUserRequest() {

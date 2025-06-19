@@ -1,7 +1,6 @@
 package com.eaglebank.api.controller;
 
-import com.eaglebank.api.dto.*;
-
+import com.eaglebank.api.dto.CreateTransactionRequest;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,66 +14,14 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
 class TransactionControllerIntegrationTest extends BaseIntegrationTest {
-    private String authToken;
-    private String userId;
-    private String accountNumber;
 
     @BeforeEach
     void setup() {
         // Create test user
-        CreateUserRequest createRequest = new CreateUserRequest();
-        createRequest.setEmail("transaction.test@example.com");
-        createRequest.setPassword("Test@123");
-        createRequest.setName("Transaction Test User");
-        createRequest.setPhoneNumber("+44123456789");
+       createTestUserAndAuthenticate();
 
-        Address address = new Address();
-        address.setLine1("123 Test St");
-        address.setTown("London");
-        address.setCounty("UK");
-        createRequest.setAddress(address);
-
-        // Register user
-        userId = given()
-            .contentType(ContentType.JSON)
-            .body(createRequest)
-        .when()
-            .post("/v1/auth/register")
-        .then()
-            .statusCode(HttpStatus.CREATED.value())
-            .extract()
-            .path("id");
-
-        // Login
-        LoginRequest loginRequest = new LoginRequest();
-        loginRequest.setUsername("transaction.test@example.com");
-        loginRequest.setPassword("Test@123");
-
-        authToken = given()
-            .contentType(ContentType.JSON)
-            .body(loginRequest)
-        .when()
-            .post("/v1/auth/login")
-        .then()
-            .statusCode(HttpStatus.OK.value())
-            .extract()
-            .path("token");
-
-        // Create a test account
-        CreateAccountRequest accountRequest = new CreateAccountRequest();
-        accountRequest.setName("Transaction Test Account");
-        accountRequest.setAccountType("CURRENT");
-
-        accountNumber = given()
-            .contentType(ContentType.JSON)
-            .header("Authorization", "Bearer " + authToken)
-            .body(accountRequest)
-        .when()
-            .post("/v1/accounts")
-        .then()
-            .statusCode(HttpStatus.CREATED.value())
-            .extract()
-            .path("accountNumber");
+      // Create a test account
+       createTestAccount();
     }
 
     @Test
@@ -94,7 +41,7 @@ class TransactionControllerIntegrationTest extends BaseIntegrationTest {
         .then()
             .statusCode(HttpStatus.CREATED.value())
             .body("amount", comparesEqualTo(100.00f))
-            .body("type", equalTo("DEPOSIT"))
+            .body("type", equalTo(DEPOSIT))
             .body("id", startsWith("tan-"));
 
         // Verify account balance
@@ -142,7 +89,7 @@ class TransactionControllerIntegrationTest extends BaseIntegrationTest {
         .then()
             .statusCode(HttpStatus.CREATED.value())
             .body("amount", comparesEqualTo(50.00f))
-            .body("type", equalTo("WITHDRAWAL"));
+            .body("type", equalTo(WITHDRAWAL));
 
         // Verify final balance
         given()
@@ -156,7 +103,7 @@ class TransactionControllerIntegrationTest extends BaseIntegrationTest {
     }
 
     @Test
-    void whenWithdrawInsufficientFunds_thenReturns400() {
+    void whenWithdrawInsufficientFunds_thenReturns422() {
         CreateTransactionRequest request = new CreateTransactionRequest();
         request.setAmount(new BigDecimal("1000.00"));
         request.setCurrency("GBP");
@@ -170,7 +117,7 @@ class TransactionControllerIntegrationTest extends BaseIntegrationTest {
         .when()
             .post("/v1/accounts/" + accountNumber + "/transactions")
         .then()
-            .statusCode(HttpStatus.BAD_REQUEST.value());
+            .statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value());
     }
 
     @Test
