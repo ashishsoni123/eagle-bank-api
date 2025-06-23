@@ -8,7 +8,7 @@ import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
 
-
+import static com.eaglebank.api.enums.Currency.GBP;
 import static com.eaglebank.api.enums.TransactionType.DEPOSIT;
 import static com.eaglebank.api.enums.TransactionType.WITHDRAWAL;
 import static io.restassured.RestAssured.given;
@@ -29,7 +29,7 @@ class TransactionControllerIntegrationTest extends BaseIntegrationTest {
     void whenDeposit_thenBalanceIncreases() {
         CreateTransactionRequest request = new CreateTransactionRequest();
         request.setAmount(new BigDecimal("100.00"));
-        request.setCurrency("GBP");
+        request.setCurrency(GBP);
         request.setType(DEPOSIT);
         request.setReference("Test deposit");
 
@@ -61,7 +61,7 @@ class TransactionControllerIntegrationTest extends BaseIntegrationTest {
         // First deposit
         CreateTransactionRequest depositRequest = new CreateTransactionRequest();
         depositRequest.setAmount(new BigDecimal("200.00"));
-        depositRequest.setCurrency("GBP");
+        depositRequest.setCurrency(GBP);
         depositRequest.setType(DEPOSIT);
         depositRequest.setReference("Initial deposit");
 
@@ -77,7 +77,7 @@ class TransactionControllerIntegrationTest extends BaseIntegrationTest {
         // Then withdraw
         CreateTransactionRequest withdrawRequest = new CreateTransactionRequest();
         withdrawRequest.setAmount(new BigDecimal("50.00"));
-        withdrawRequest.setCurrency("GBP");
+        withdrawRequest.setCurrency(GBP);
         withdrawRequest.setType(WITHDRAWAL);
         withdrawRequest.setReference("Test withdrawal");
 
@@ -107,7 +107,7 @@ class TransactionControllerIntegrationTest extends BaseIntegrationTest {
     void whenWithdrawInsufficientFunds_thenReturns422() {
         CreateTransactionRequest request = new CreateTransactionRequest();
         request.setAmount(new BigDecimal("1000.00"));
-        request.setCurrency("GBP");
+        request.setCurrency(GBP);
         request.setType(WITHDRAWAL);
         request.setReference("Insufficient funds test");
 
@@ -126,7 +126,7 @@ class TransactionControllerIntegrationTest extends BaseIntegrationTest {
         // Create a transaction first
         CreateTransactionRequest request = new CreateTransactionRequest();
         request.setAmount(new BigDecimal("75.00"));
-        request.setCurrency("GBP");
+        request.setCurrency(GBP);
         request.setType(DEPOSIT);
         request.setReference("List test transaction");
 

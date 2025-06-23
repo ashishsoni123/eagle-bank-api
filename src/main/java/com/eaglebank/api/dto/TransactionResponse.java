@@ -1,5 +1,6 @@
 package com.eaglebank.api.dto;
 
+import com.eaglebank.api.enums.Currency;
 import com.eaglebank.api.enums.TransactionType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 public class TransactionResponse {
     private String id; // Matches pattern: ^tan-[A-Za-z0-9]$
     private BigDecimal amount;
-    private String currency;
+    private Currency currency;
     private TransactionType type;
     private String reference;
     private String userId;

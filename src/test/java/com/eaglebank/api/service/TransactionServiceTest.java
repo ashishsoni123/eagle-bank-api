@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static com.eaglebank.api.enums.Currency.GBP;
 import static com.eaglebank.api.enums.TransactionType.DEPOSIT;
 import static com.eaglebank.api.enums.TransactionType.WITHDRAWAL;
 import static org.junit.jupiter.api.Assertions.*;
@@ -60,7 +61,7 @@ public class TransactionServiceTest {
         testTransaction = new Transaction();
         testTransaction.setId(transactionId);
         testTransaction.setAmount(new BigDecimal("100.00"));
-        testTransaction.setCurrency("GBP");
+        testTransaction.setCurrency(GBP);
         testTransaction.setType(DEPOSIT);
         testTransaction.setReference("Test transaction");
         testTransaction.setUserId(userId);
@@ -69,13 +70,13 @@ public class TransactionServiceTest {
 
         depositRequest = new CreateTransactionRequest();
         depositRequest.setAmount(new BigDecimal("100.00"));
-        depositRequest.setCurrency("GBP");
+        depositRequest.setCurrency(GBP);
         depositRequest.setType(DEPOSIT);
         depositRequest.setReference("Test deposit");
 
         withdrawalRequest = new CreateTransactionRequest();
         withdrawalRequest.setAmount(new BigDecimal("50.00"));
-        withdrawalRequest.setCurrency("GBP");
+        withdrawalRequest.setCurrency(GBP);
         withdrawalRequest.setType(WITHDRAWAL);
         withdrawalRequest.setReference("Test withdrawal");
     }

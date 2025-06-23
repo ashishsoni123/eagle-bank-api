@@ -1,5 +1,6 @@
 package com.eaglebank.api.dto;
 
+import com.eaglebank.api.enums.Currency;
 import com.eaglebank.api.enums.TransactionType;
 import jakarta.validation.constraints.*;
 import lombok.Data;
@@ -13,9 +14,8 @@ public class CreateTransactionRequest {
     @Digits(integer = 8, fraction = 2, message = "Amount must have up to 2 decimal places")
     private BigDecimal amount;
 
-    @NotBlank(message = "Currency cannot be blank")
-    @Pattern(regexp = "GBP", message = "Currency must be 'GBP'")
-    private String currency;
+    @NotNull(message = "Currency cannot be null")
+    private Currency currency;
 
     @NotNull(message = "Transaction type cannot be null")
     private TransactionType type;
