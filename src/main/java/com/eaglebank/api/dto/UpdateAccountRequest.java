@@ -1,11 +1,10 @@
 package com.eaglebank.api.dto;
 
-import jakarta.validation.constraints.Pattern;
+import com.eaglebank.api.enums.AccountType;
 import lombok.Data;
 
 @Data
 public class UpdateAccountRequest {
     private String name;
-    @Pattern(regexp = "personal", message = "Account type must be 'personal'")
-    private String accountType;
+    private AccountType accountType;
 }

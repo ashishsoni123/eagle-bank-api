@@ -4,6 +4,7 @@ import com.eaglebank.api.dto.CreateAccountRequest;
 import com.eaglebank.api.dto.UpdateAccountRequest;
 import com.eaglebank.api.exceptiom.ResourceNotFoundException;
 import com.eaglebank.api.model.Account;
+import com.eaglebank.api.enums.AccountType;
 import com.eaglebank.api.model.User;
 import com.eaglebank.api.repository.AccountRepository;
 import com.eaglebank.api.repository.UserRepository;
@@ -15,7 +16,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -53,7 +53,7 @@ public class AccountServiceTest {
         testAccount = new Account();
         testAccount.setAccountNumber(accountNumber);
         testAccount.setName("Test Account");
-        testAccount.setAccountType("SAVINGS");
+        testAccount.setAccountType(AccountType.SAVINGS);
         testAccount.setBalance(BigDecimal.ZERO);
         testAccount.setCurrency("GBP");
         testAccount.setUser(testUser);
@@ -64,7 +64,7 @@ public class AccountServiceTest {
         // Arrange
         CreateAccountRequest request = new CreateAccountRequest();
         request.setName("Test Account");
-        request.setAccountType("SAVINGS");
+        request.setAccountType(AccountType.SAVINGS);
 
         when(userRepository.findById(userId)).thenReturn(Optional.of(testUser));
         when(accountRepository.save(any(Account.class))).thenReturn(testAccount);
@@ -75,7 +75,7 @@ public class AccountServiceTest {
         // Assert
         assertNotNull(result);
         assertEquals("Test Account", result.getName());
-        assertEquals("SAVINGS", result.getAccountType());
+        assertEquals(AccountType.SAVINGS, result.getAccountType());
         assertEquals(BigDecimal.ZERO, result.getBalance());
         assertEquals("GBP", result.getCurrency());
         verify(userRepository).findById(userId);
@@ -142,7 +142,7 @@ public class AccountServiceTest {
         // Arrange
         UpdateAccountRequest request = new UpdateAccountRequest();
         request.setName("Updated Account Name");
-        request.setAccountType("CURRENT");
+        request.setAccountType(AccountType.BUSINESS);
 
         when(accountRepository.findByAccountNumberAndUserId(accountNumber, userId))
                 .thenReturn(Optional.of(testAccount));
@@ -154,7 +154,7 @@ public class AccountServiceTest {
         // Assert
         assertNotNull(result);
         assertEquals("Updated Account Name", result.getName());
-        assertEquals("CURRENT", result.getAccountType());
+        assertEquals(AccountType.BUSINESS, result.getAccountType());
         verify(accountRepository).findByAccountNumberAndUserId(accountNumber, userId);
         verify(accountRepository).save(testAccount);
     }

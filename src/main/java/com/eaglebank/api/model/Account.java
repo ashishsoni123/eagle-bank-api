@@ -1,5 +1,6 @@
 package com.eaglebank.api.model;
 
+import com.eaglebank.api.enums.AccountType;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -40,9 +41,8 @@ public class Account {
     @NotBlank(message = "Account name cannot be blank")
     private String name;
 
-    @NotBlank(message = "Account type cannot be blank")
-    @Pattern(regexp = "personal", message = "Account type must be 'personal'")
-    private String accountType;
+    @NotNull(message = "Account type cannot be blank")
+    private AccountType accountType;
 
     @NotNull(message = "Balance cannot be null")
     @DecimalMin(value = "0.00", message = "Balance cannot be negative")

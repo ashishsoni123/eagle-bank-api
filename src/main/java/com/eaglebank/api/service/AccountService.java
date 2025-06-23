@@ -60,7 +60,7 @@ public class AccountService {
         if (StringUtils.isNotBlank(request.getName()))  {
             account.setName(request.getName());
         }
-        if (StringUtils.isNotBlank(request.getAccountType())) {
+        if (request.getAccountType()!= null) {
             account.setAccountType(request.getAccountType());
         }
 

@@ -1,5 +1,6 @@
 package com.eaglebank.api.dto;
 
+import com.eaglebank.api.enums.AccountType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,7 +15,7 @@ public class AccountResponse {
     private String accountNumber; // Matches pattern: ^01\d{6}$
     private String sortCode; // Matches enum: "10-10-10"
     private String name;
-    private String accountType; // Matches enum: "personal"
+    private AccountType accountType;
     private BigDecimal balance;
     private String currency; // Matches enum: "GBP"
     private LocalDateTime createdTimestamp;

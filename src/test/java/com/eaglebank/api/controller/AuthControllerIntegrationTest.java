@@ -48,14 +48,13 @@ class AuthControllerIntegrationTest extends BaseIntegrationTest {
             .body("message", equalTo("Invalid username or password"));
     }
 
-  /*  @Test
+    @Test
     void whenInvalidPassword_thenReturns403() {
         // First create a user with known credentials
-        String testEmail = generateRandomEmail();
-        createTestUserWithEmail(testEmail);
+
 
         LoginRequest loginRequest = new LoginRequest();
-        loginRequest.setUsername(testEmail);
+        loginRequest.setUsername(TEST_EMAIL);
         loginRequest.setPassword("WrongPassword123!");
 
         given()
@@ -86,7 +85,7 @@ class AuthControllerIntegrationTest extends BaseIntegrationTest {
     @Test
     void whenEmptyPassword_thenReturns400() {
         LoginRequest loginRequest = new LoginRequest();
-        loginRequest.setUsername(generateRandomEmail());
+        loginRequest.setUsername(TEST_EMAIL);
         loginRequest.setPassword("");
 
         given()
@@ -96,5 +95,5 @@ class AuthControllerIntegrationTest extends BaseIntegrationTest {
             .post("/v1/auth/login")
         .then()
             .statusCode(HttpStatus.BAD_REQUEST.value());
-    }*/
+    }
 }

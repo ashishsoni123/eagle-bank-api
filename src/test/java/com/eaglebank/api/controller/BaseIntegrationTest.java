@@ -15,7 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.UUID;
 
-import static com.eaglebank.api.controller.AccountControllerIntegrationTest.PERSONAL;
+import static com.eaglebank.api.enums.AccountType.PERSONAL;
 import static io.restassured.RestAssured.given;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
