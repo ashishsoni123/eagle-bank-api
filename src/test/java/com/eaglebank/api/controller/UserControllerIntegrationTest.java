@@ -20,19 +20,6 @@ class UserControllerIntegrationTest extends BaseIntegrationTest {
     }
 
     @Test
-    void whenCreateUserWithExistingEmail_thenReturns400() {
-        CreateUserRequest createRequest = createUserRequest();
-        given()
-                .contentType(ContentType.JSON)
-                .body(createRequest)
-                .when()
-                .post("/v1/users")
-                .then()
-                .statusCode(HttpStatus.BAD_REQUEST.value())
-                .body("message", equalTo("User with this email already exists."));
-    }
-
-    @Test
     void whenGetUser_thenReturnsUserDetails() {
         given()
             .contentType(ContentType.JSON)
@@ -46,6 +33,20 @@ class UserControllerIntegrationTest extends BaseIntegrationTest {
             .body("name", equalTo("Test User"))
             .body("phoneNumber", equalTo("+447438390300"));
     }
+
+    @Test
+    void whenCreateUserWithExistingEmail_thenReturns400() {
+        CreateUserRequest createRequest = createUserRequest();
+        given()
+                .contentType(ContentType.JSON)
+                .body(createRequest)
+                .when()
+                .post("/v1/users")
+                .then()
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .body("message", equalTo("User with this email already exists."));
+    }
+
 
     @Test
     void whenUpdateUser_thenReturnsUpdatedDetails() {
@@ -63,6 +64,46 @@ class UserControllerIntegrationTest extends BaseIntegrationTest {
             .statusCode(HttpStatus.OK.value())
             .body("name", equalTo("Updated Name"))
             .body("phoneNumber", equalTo("+44987654321"));
+    }
+
+    @Test
+    void whenUpdateUser_withOtherUserProfile_thenReturns403() {
+        UpdateUserRequest updateRequest = new UpdateUserRequest();
+        updateRequest.setName("Updated Name");
+        updateRequest.setPhoneNumber("+44987654321");
+
+        CreateUserRequest createRequest = new CreateUserRequest();
+        createRequest.setEmail("user.test2@example.com");
+        createRequest.setPassword("test1234");
+        createRequest.setName("Test User");
+        createRequest.setPhoneNumber("+447438390300");
+
+        Address address = new Address();
+        address.setLine1("123 Test St");
+        address.setTown("London");
+        address.setCounty("UK");
+        address.setPostcode("SL");
+        createRequest.setAddress(address);
+
+        // Register user and extract ID
+        String otherUserId = given()
+                .contentType(ContentType.JSON)
+                .body(createRequest)
+                .when()
+                .post("/v1/users")
+                .then()
+                .statusCode(HttpStatus.CREATED.value())
+                .extract()
+                .path("id");
+
+        given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "Bearer " + authToken)
+                .body(updateRequest)
+                .when()
+                .patch("/v1/users/" + otherUserId)
+                .then()
+                .statusCode(HttpStatus.FORBIDDEN.value());
     }
 
     @Test

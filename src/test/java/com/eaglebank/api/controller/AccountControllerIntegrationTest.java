@@ -47,10 +47,26 @@ class AccountControllerIntegrationTest extends BaseIntegrationTest {
 
     }
 
+    @Test
+    void whenCreateAccount_accessTokenIsMissing_thenReturns403() {
+        CreateAccountRequest request = new CreateAccountRequest();
+        request.setName("Second Account");
+        request.setAccountType(PERSONAL);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(request)
+                .when()
+                .post("/v1/accounts")
+                .then()
+                .statusCode(HttpStatus.FORBIDDEN.value());
+
+    }
+
     @ParameterizedTest
     @NullAndEmptySource
     @ValueSource(strings = {"   ", "\t", "\n"})
-    void whenNameIsBlankOrNull_thenReturnsBadRequest(String invalidName) {
+    void whenCreateAccount_NameIsBlankOrNull_thenReturnsBadRequest(String invalidName) {
         CreateAccountRequest request = new CreateAccountRequest();
         request.setName(invalidName);
         request.setAccountType(AccountType.PERSONAL);
@@ -67,7 +83,7 @@ class AccountControllerIntegrationTest extends BaseIntegrationTest {
     }
 
     @Test
-    void whenAccountTypeIsNull_thenReturnsBadRequest() {
+    void whenCreateAccount_whenAccountTypeIsNull_thenReturnsBadRequest() {
         CreateAccountRequest request = new CreateAccountRequest();
         request.setName("Test Account");
         request.setAccountType(null);
@@ -84,7 +100,7 @@ class AccountControllerIntegrationTest extends BaseIntegrationTest {
     }
 
     @Test
-    void whenNameExceedsMaxLength_thenReturnsBadRequest() {
+    void whenCreateAccount_whenNameExceedsMaxLength_thenReturnsBadRequest() {
         CreateAccountRequest request = new CreateAccountRequest();
         request.setName("A".repeat(101)); // Assuming max length is 100
         request.setAccountType(AccountType.PERSONAL);
