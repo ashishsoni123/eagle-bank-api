@@ -1,6 +1,7 @@
 package com.eaglebank.api.service;
 
 import com.eaglebank.api.dto.CreateTransactionRequest;
+import com.eaglebank.api.enums.TransactionType;
 import com.eaglebank.api.exceptiom.BadRequestException;
 import com.eaglebank.api.exceptiom.InsufficientFundsException;
 import com.eaglebank.api.exceptiom.ResourceNotFoundException;
@@ -17,12 +18,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import static com.eaglebank.api.enums.TransactionType.DEPOSIT;
+import static com.eaglebank.api.enums.TransactionType.WITHDRAWAL;
+
 @Service
 @RequiredArgsConstructor
 public class TransactionService {
-
-    public static final String DEPOSIT = "deposit";
-    public static final String WITHDRAWAL = "withdrawal";
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
 
@@ -32,11 +33,11 @@ public class TransactionService {
                 .orElseThrow(() -> new ResourceNotFoundException("Bank account was not found or not associated with your user."));
 
         BigDecimal amount = request.getAmount();
-        String type = request.getType();
+        TransactionType type = request.getType();
 
-        if (type.equalsIgnoreCase(DEPOSIT)) {
+        if (type.equals(DEPOSIT)) {
             account.setBalance(account.getBalance().add(amount));
-        } else if (type.equalsIgnoreCase(WITHDRAWAL)) {
+        } else if (type.equals(WITHDRAWAL)) {
             if (account.getBalance().compareTo(amount) < 0) {
                 throw new InsufficientFundsException("Insufficient funds to process transaction.");
             }

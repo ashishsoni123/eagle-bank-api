@@ -1,5 +1,6 @@
 package com.eaglebank.api.dto;
 
+import com.eaglebank.api.enums.TransactionType;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
@@ -16,9 +17,8 @@ public class CreateTransactionRequest {
     @Pattern(regexp = "GBP", message = "Currency must be 'GBP'")
     private String currency;
 
-    @NotBlank(message = "Transaction type cannot be blank")
-    @Pattern(regexp = "deposit|withdrawal", message = "Transaction type must be 'deposit' or 'withdrawal'")
-    private String type;
+    @NotNull(message = "Transaction type cannot be null")
+    private TransactionType type;
 
     private String reference;
 }

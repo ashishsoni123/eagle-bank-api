@@ -8,8 +8,9 @@ import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
 
-import static com.eaglebank.api.service.TransactionService.DEPOSIT;
-import static com.eaglebank.api.service.TransactionService.WITHDRAWAL;
+
+import static com.eaglebank.api.enums.TransactionType.DEPOSIT;
+import static com.eaglebank.api.enums.TransactionType.WITHDRAWAL;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 
@@ -41,7 +42,7 @@ class TransactionControllerIntegrationTest extends BaseIntegrationTest {
         .then()
             .statusCode(HttpStatus.CREATED.value())
             .body("amount", comparesEqualTo(100.00f))
-            .body("type", equalTo(DEPOSIT))
+            .body("type", equalTo(DEPOSIT.getValue()))
             .body("id", startsWith("tan-"));
 
         // Verify account balance
@@ -89,7 +90,7 @@ class TransactionControllerIntegrationTest extends BaseIntegrationTest {
         .then()
             .statusCode(HttpStatus.CREATED.value())
             .body("amount", comparesEqualTo(50.00f))
-            .body("type", equalTo(WITHDRAWAL));
+            .body("type", equalTo(WITHDRAWAL.getValue()));
 
         // Verify final balance
         given()

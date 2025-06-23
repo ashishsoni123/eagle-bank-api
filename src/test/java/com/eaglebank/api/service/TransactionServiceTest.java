@@ -1,7 +1,6 @@
 package com.eaglebank.api.service;
 
 import com.eaglebank.api.dto.CreateTransactionRequest;
-import com.eaglebank.api.exceptiom.BadRequestException;
 import com.eaglebank.api.exceptiom.InsufficientFundsException;
 import com.eaglebank.api.exceptiom.ResourceNotFoundException;
 import com.eaglebank.api.model.Account;
@@ -21,6 +20,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static com.eaglebank.api.enums.TransactionType.DEPOSIT;
+import static com.eaglebank.api.enums.TransactionType.WITHDRAWAL;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -60,7 +61,7 @@ public class TransactionServiceTest {
         testTransaction.setId(transactionId);
         testTransaction.setAmount(new BigDecimal("100.00"));
         testTransaction.setCurrency("GBP");
-        testTransaction.setType("deposit");
+        testTransaction.setType(DEPOSIT);
         testTransaction.setReference("Test transaction");
         testTransaction.setUserId(userId);
         testTransaction.setCreatedTimestamp(LocalDateTime.now());
@@ -69,13 +70,13 @@ public class TransactionServiceTest {
         depositRequest = new CreateTransactionRequest();
         depositRequest.setAmount(new BigDecimal("100.00"));
         depositRequest.setCurrency("GBP");
-        depositRequest.setType("deposit");
+        depositRequest.setType(DEPOSIT);
         depositRequest.setReference("Test deposit");
 
         withdrawalRequest = new CreateTransactionRequest();
         withdrawalRequest.setAmount(new BigDecimal("50.00"));
         withdrawalRequest.setCurrency("GBP");
-        withdrawalRequest.setType("withdrawal");
+        withdrawalRequest.setType(WITHDRAWAL);
         withdrawalRequest.setReference("Test withdrawal");
     }
 
@@ -125,21 +126,6 @@ public class TransactionServiceTest {
         // Act & Assert
         assertThrows(InsufficientFundsException.class,
                 () -> transactionService.performTransaction(accountNumber, userId, withdrawalRequest));
-        verify(accountRepository, never()).save(any());
-        verify(transactionRepository, never()).save(any());
-    }
-
-    @Test
-    void performTransaction_InvalidType() {
-        // Arrange
-        CreateTransactionRequest invalidRequest = new CreateTransactionRequest();
-        invalidRequest.setType("invalid_type");
-        when(accountRepository.findByAccountNumberAndUserId(accountNumber, userId))
-                .thenReturn(Optional.of(testAccount));
-
-        // Act & Assert
-        assertThrows(BadRequestException.class,
-                () -> transactionService.performTransaction(accountNumber, userId, invalidRequest));
         verify(accountRepository, never()).save(any());
         verify(transactionRepository, never()).save(any());
     }

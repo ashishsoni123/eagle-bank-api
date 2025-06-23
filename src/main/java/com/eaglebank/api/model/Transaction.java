@@ -1,5 +1,6 @@
 package com.eaglebank.api.model;
 
+import com.eaglebank.api.enums.TransactionType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -37,9 +38,8 @@ public class Transaction {
     @Pattern(regexp = "GBP", message = "Currency must be 'GBP'")
     private String currency;
 
-    @NotBlank(message = "Transaction type cannot be blank")
-    @Pattern(regexp = "deposit|withdrawal", message = "Transaction type must be 'deposit' or 'withdrawal'")
-    private String type;
+    @NotNull(message = "Transaction type cannot be null")
+    private TransactionType type;
 
     private String reference;
 
